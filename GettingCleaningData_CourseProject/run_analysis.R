@@ -57,4 +57,4 @@ TidyData <- cbind(activity = gsub("[0-9]","",rownames(TidyData)),TidyData)
 # Finally order the data.frame properly and get rid of the rownames
 TidyData <- TidyData[order(as.integer(as.character(TidyData$subject_id))),]
 rownames(TidyData) <- 1:nrow(TidyData)
-TidyData
+write.table(TidyData,paste0(OutputFolder,"TidyData.txt"))
