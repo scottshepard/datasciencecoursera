@@ -10,6 +10,8 @@ DataFolder <- "~/code/datasciencecoursera/data/GettingCleaningData_CourseProject
 OutputFolder <- "~/code/datasciencecoursera/GettingCleaningData_CourseProject/"
 setwd(DataFolder)
 
+
+## Part 1: Read in, format, and merge the data sets
 test_data <- read.table("test/X_test.txt")
 test_subjects <- readLines("test/subject_test.txt")
 test_activities <- readLines("test/y_test.txt")
@@ -38,11 +40,21 @@ data <- data[,grepl("activity",names(data)) |
                !grepl("Freq",names(data)) | 
                grepl("std",names(data))
              ]
-data_by_subject <- split(data,data$subject_id)
+
+## Part 2: Create the tidy dataset
+
+# Create empty data.frame to write to
 TidyData <- as.data.frame(matrix(nrow=0,ncol=67))
+# Loop through all subject ids
+# For each subject id, subset the data, then use the daply function to split by activity and get the column means
+# bind this with labels for the subject to the TidyData data.frame
 subject_ids <- unique(data$subject_id)
 for (s_id in subject_ids) {
     TidyData <- rbind(TidyData,cbind(subject_id = s_id,daply(subset(data,subject_id == s_id),.(activity_label),function(y) colMeans(y[,2:67]))))
 }
+# Now bind the activty name as a column to the TidyData data.frame
 TidyData <- cbind(activity = gsub("[0-9]","",rownames(TidyData)),TidyData)
+# Finally order the data.frame properly and get rid of the rownames
 TidyData <- TidyData[order(as.integer(as.character(TidyData$subject_id))),]
+rownames(TidyData) <- 1:nrow(TidyData)
+TidyData
