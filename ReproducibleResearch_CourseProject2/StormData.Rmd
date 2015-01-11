@@ -1,0 +1,111 @@
+---
+title: "Weather Events Damage and Health Effects"
+output: html_document
+---
+
+## Synopsis
+
+The U.S. National Oceanic and Atmospheric Administration's (NOAA) collects data
+on all major weather events in the US from 1950 until today. This analysis 
+investigates the most harmful types of weather events across four categories:
+
+* Fatalities
+* Injuries
+* Property Damage
+* Crop Damage
+
+## Data Processing
+
+We will be using U.S. National Oceanic and Atmospheric Administration's (NOAA) 
+storm database. This database tracks characteristics of major storms and weather 
+events in the United States, including when and where they occur, as well as 
+estimates of any fatalities, injuries, and property damage.
+
+First download the storm data and store as a csv in your working directory. Then
+read it into R and delete the csv.
+
+```{r download_storm_data, cache=T}
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2","storm_data.csv","curl")
+storms <- read.csv("storm_data.csv")
+unlink("storm_data.csv")
+```
+
+Collect some summary stats on the dataset & analyze the missign values.
+```{r summary stats}
+nrow = nrow(storms)
+num_events <- length(unique(storms$EVTYPE))
+mean_na <- mean(is.na(storms[,c("INJURIES","FATALITIES","PROPDMG","CROPDMG")]))
+```
+
+We know that there are `r nrow` observations in this dataset and 
+`r num_events` different types of events to be looked at. We also know that 
+of the fiels where we will be looking, there are `r mean_na` missing values,
+so we can feel safe in analyzing the entire set.
+
+Now we process the data, taking the mean number of fatalities, injuries, 
+property damange, and crop damage at each.
+
+```{r data processing}
+damage_by_type <- 
+  aggregate(storms[,c("INJURIES","FATALITIES","PROPDMG","CROPDMG")], 
+            by=list(storms$EVTYPE), FUN="mean")
+names(damage_by_type)[1] <- "EVTYPE"
+```
+
+Collect the number of events that caused damage in each category and the event
+that caused the most damage in each category. Loop through the fields to find 
+the index of the max and then collect the category and max for that damage type.
+
+```{r data summary}
+num_injury_events <- nrow(subset(damage_by_type, INJURIES > 0))
+num_fatality_events <- nrow(subset(damage_by_type, FATALITIES > 0))
+num_propdmg_events <- nrow(subset(damage_by_type, PROPDMG > 0))
+num_cropdmg_events <- nrow(subset(damage_by_type, PROPDMG > 0))
+
+injuries <- damage_by_type[,1:2]
+injuries <- injuries[rev(order(injuries$INJURIES)),]
+injuries <- head(injuries,5)
+
+fatalities <- damage_by_type[,c(1,3)]
+fatalities <- fatalities[rev(order(fatalities$FATALITIES)),]
+fatalities <- head(fatalities,5)
+
+propdmg <- damage_by_type[,c(1,4)]
+propdmg <- propdmg[rev(order(propdmg$PROPDMG)),]
+propdmg <- head(propdmg,5)
+
+cropdmg <- damage_by_type[,c(1,5)]
+cropdmg <- cropdmg[rev(order(cropdmg$CROPDMG)),]
+cropdmg <- head(cropdmg,5)
+```
+
+## Results
+
+Each of the four different types of harm has differnet events associated with
+damage. We can see the top five events for each type of harm plotted below.
+
+```{r plot}
+par(mfrow=c(2,2))
+with(injuries, barplot(INJURIES, names.arg=EVTYPE, las=2, cex.names=.7))
+with(fatalities, barplot(FATALITIES, names.arg=EVTYPE, las=2, cex.names=.7))
+with(propdmg, barplot(PROPDMG, names.arg=EVTYPE, las=2, cex.names=.7))
+with(cropdmg, barplot(CROPDMG, names.arg=EVTYPE, las=2, cex.names=.7))
+```
+
+The top five events for all four type of harm are
+
+``` {r}
+injuries
+```
+
+``` {r}
+fatalities
+```
+
+``` {r}
+propdmg
+```
+
+``` {r}
+cropdmg
+```

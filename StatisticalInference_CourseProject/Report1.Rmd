@@ -1,0 +1,49 @@
+---
+title: "Statisical Inference Course Project -- Part I"
+author: "Scott Shepard"
+date: "October 26, 2014"
+output: pdf_document
+---
+
+This is the first of two reports for the Statistical Inference Course Project.
+
+This report explores the exponential distribution. The exponential distribution 
+$p(x)={lambda^2}$ It has a mean of 1/lambda and a standard deviation of 1/lambda.
+
+In R we can use the function rexp(n, lambda) to simulate the exponential
+distribution. We take 40 observations 1000 times with lambda = 0.2.
+
+```{r}
+  lambda = 0.2
+  trials <- lapply(1:1000, function(i) rexp(40, lambda))
+```
+We can then take the means of each of these trials
+```{r}
+  trial_means <- sapply(trials, mean)
+```
+
+These trial means should be centered at the theoretical mean. So we exepect the 
+median of the trial_means to be about 5.
+
+The standard deviation of these means should be about the theoretical standard
+error, which is the distribution's standard deviation devided by the square 
+root of the number of observations, which is this case is 40.
+
+```{r echo=FALSE}
+  theoretical_mean <- 1/lambda
+  standard_error <- (1/lambda) / sqrt(40)
+  median <- median(trial_means)
+  sd <- sd(trial_means)
+```
+
+The theoretical mean is `r theoretical_mean` and the trial means are centered
+at `r median` so that checks out. The standard error is `r standard_error` and 
+standard deviation of the trial means is `r sd` so that also checks out.
+
+The trial means are approximately normaly distributed. We can see this by looking
+at a histogram of the trial means.
+```{r}
+  hist(trial_means, main="Distribution of Means")
+```  
+
+See, normal distribution.
